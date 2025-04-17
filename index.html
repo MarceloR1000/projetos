@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabela com Busca por Coluna e Link como PDF</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+		width: 80%;
+		margin: 20px auto; /* centraliza horizontalmente */
+		border-collapse: collapse;
+		background-color: white;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007BFF; /* azul médio */
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .filtro-coluna {
+      width: 100%;
+      padding: 6px;
+      margin-top: 6px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #000;
+      box-sizing: border-box;
+    }
+
+    a.link-pdf {
+      color: #4CAF50;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    a.link-pdf:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h2>Dados da Planilha</h2>
+  <div id="tabela-container"></div>
+
+  <script>
+    let linhasOriginal = [];
+    let indiceLink = -1;
+    let cabecalhos = [];
+
+    fetch('dados.csv')
+      .then(response => response.text())
+      .then(text => {
+        const linhas = text.trim().split('\n');
+        cabecalhos = linhas[0].split(',');
+        indiceLink = cabecalhos.findIndex(col => col.trim().toLowerCase() === 'link');
+        linhasOriginal = linhas.slice(1);
+        montarTabela();
+      });
+
+    function montarTabela() {
+      let html = '<table><thead><tr>';
+
+      // Cabeçalhos com inputs de filtro (exceto para LINK)
+      cabecalhos.forEach((th, i) => {
+        html += `<th>${th}`;
+        if (i !== indiceLink) {
+          html += `<br><input type="text" class="filtro-coluna" data-coluna="${i}" placeholder="Filtrar ${th}">`;
+        }
+        html += '</th>';
+      });
+
+      html += '</tr></thead><tbody id="corpo-tabela"></tbody></table>';
+      document.getElementById('tabela-container').innerHTML = html;
+
+      // Adiciona eventos aos inputs de filtro
+      document.querySelectorAll('.filtro-coluna').forEach(input => {
+        input.addEventListener('input', aplicarFiltros);
+      });
+
+      aplicarFiltros(); // mostrar todos inicialmente
+    }
+
+    function aplicarFiltros() {
+      const filtros = Array.from(document.querySelectorAll('.filtro-coluna')).map(input => ({
+        coluna: parseInt(input.dataset.coluna),
+        valor: input.value.trim().toLowerCase()
+      }));
+
+      const linhasFiltradas = linhasOriginal.filter(linha => {
+        const colunas = linha.split(',');
+        return filtros.every(filtro => {
+          const valorCelula = colunas[filtro.coluna] || '';
+          return valorCelula.toLowerCase().includes(filtro.valor);
+        });
+      });
+
+      // Recria apenas o <tbody>
+      const corpo = document.getElementById('corpo-tabela');
+      corpo.innerHTML = '';
+
+      linhasFiltradas.forEach(linha => {
+        const colunas = linha.split(',');
+        let row = '<tr>';
+        colunas.forEach((coluna, j) => {
+          if (j === indiceLink) {
+            row += `<td><a class="link-pdf" href="${coluna}" target="_blank">PDF</a></td>`;
+          } else {
+            row += `<td>${coluna}</td>`;
+          }
+        });
+        row += '</tr>';
+        corpo.innerHTML += row;
+      });
+    }
+  </script>
+</body>
+</html>
