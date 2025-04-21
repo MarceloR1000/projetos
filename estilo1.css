@@ -1,7 +1,7 @@
-@import url('https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/materia/bootstrap.min.css');
+@import url('https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/zephyr/bootstrap.min.css');
 
-/* Personalizações opcionais */
-/* body {
+/* Personalizações extras */
+body {
   background-color: #fefefe;
 }
 
@@ -12,4 +12,4 @@ h2 {
 input.filtro-coluna {
   margin-top: 6px;
 }
- */
+
