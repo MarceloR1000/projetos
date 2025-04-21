@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Índice Documentos</title>
+  <link rel="stylesheet" href="estilo1.css">
+</head>
+<body class="container my-5">
+
+  <h2 class="text-center text-primary mb-4">Índice de Documentos</h2>
+  <div id="tabela-container"></div>
+
+  <script>
+    let linhasOriginal = [];
+    let indiceLink = -1;
+    let cabecalhos = [];
+
+    fetch('dados.csv')
+      .then(response => response.text())
+      .then(text => {
+        const linhas = text.trim().split('\n');
+        cabecalhos = linhas[0].split(',');
+        indiceLink = cabecalhos.findIndex(col => col.trim().toLowerCase() === 'link');
+        linhasOriginal = linhas.slice(1);
+        montarTabela();
+      });
+
+    function montarTabela() {
+      let html = '<table class="table table-bordered table-hover shadow-sm"><thead><tr>';
+
+      cabecalhos.forEach((th, i) => {
+        html += `<th>${th}`;
+        if (i !== indiceLink) {
+          html += `<br><input type="text" class="form-control form-control-sm filtro-coluna" data-coluna="${i}" placeholder="Filtrar ${th}">`;
+        }
+        html += '</th>';
+      });
+
+      html += '</tr></thead><tbody id="corpo-tabela"></tbody></table>';
+      document.getElementById('tabela-container').innerHTML = html;
+
+      document.querySelectorAll('.filtro-coluna').forEach(input => {
+        input.addEventListener('input', aplicarFiltros);
+      });
+
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const filtros = Array.from(document.querySelectorAll('.filtro-coluna')).map(input => ({
+        coluna: parseInt(input.dataset.coluna),
+        valor: input.value.trim().toLowerCase()
+      }));
+
+      const linhasFiltradas = linhasOriginal.filter(linha => {
+        const colunas = linha.split(',');
+        return filtros.every(filtro => {
+          const valorCelula = colunas[filtro.coluna] || '';
+          return valorCelula.toLowerCase().includes(filtro.valor);
+        });
+      });
+
+      const corpo = document.getElementById('corpo-tabela');
+      corpo.innerHTML = '';
+
+      linhasFiltradas.forEach(linha => {
+        const colunas = linha.split(',');
+        let row = '<tr>';
+        colunas.forEach((coluna, j) => {
+          if (j === indiceLink) {
+            row += `<td><a class="btn btn-success btn-sm" href="${coluna}" target="_blank">PDF</a></td>`;
+          } else {
+            row += `<td>${coluna}</td>`;
+          }
+        });
+        row += '</tr>';
+        corpo.innerHTML += row;
+      });
+    }
+  </script>
+</body>
+</html>
