@@ -2,7 +2,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    padding: 20px;
+    font-size: 14px; /* Define o tamanho fixo da fonte */
     background-color: #f7f7f7;
   }
   
@@ -20,6 +20,7 @@ body {
   }
   
   th, td {
+    font-size: 14px; /* Define o tamanho fixo da fonte */
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #ddd;
@@ -36,6 +37,7 @@ body {
   
   .filtro-coluna {
     width: 100%;
+    font-size: 14px; /* Define o tamanho fixo da fonte */
     padding: 6px;
     margin-top: 6px;
     border-radius: 4px;
